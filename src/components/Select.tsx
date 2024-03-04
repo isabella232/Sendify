@@ -4,7 +4,12 @@ import { Address, erc20Abi, formatUnits } from 'viem';
 import { useReadContracts } from 'wagmi';
 import { useAccount } from 'wagmi'
 
-export function Select(props: { options: string[], onSelect?: (value: Address | undefined) => void }) {
+export function Select(props: {
+  options: string[],
+  onSelect?: (value: Address | undefined) => void,
+  disabled?: boolean,
+  scopeKey?: string,
+}) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   })
@@ -33,7 +38,8 @@ export function Select(props: { options: string[], onSelect?: (value: Address | 
             address: o as Address,
             abi: erc20Abi,
             functionName: "balanceOf",
-            args: [account.address]
+            args: [account.address],
+            scopeKey: props?.scopeKey,
           }
         }) : []
       )
@@ -66,7 +72,7 @@ export function Select(props: { options: string[], onSelect?: (value: Address | 
   return (
     <Combobox
       store={combobox}
-      disabled={props?.options.length === 0}
+      disabled={props?.options.length === 0 || props?.disabled}
       onOptionSubmit={(val) => {
         setValue(val as Address);
         combobox.closeDropdown();
@@ -78,6 +84,7 @@ export function Select(props: { options: string[], onSelect?: (value: Address | 
           component="button"
           type="button"
           pointer
+          disabled={props?.options.length === 0 || props?.disabled}
           rightSection={<Combobox.Chevron />}
           rightSectionPointerEvents="none"
           onClick={() => combobox.toggleDropdown()}

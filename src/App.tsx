@@ -4,10 +4,12 @@ import { Topbar } from './components/Topbar';
 import { MantineProvider, createTheme, MantineColorsTuple } from '@mantine/core';
 import { HashRouter as Router, Route, Routes } from "react-router-dom"
 
+import '@mantine/notifications/styles.css';
 import "@mantine/core/styles.css"
 import "./App.css"
 
 import { Send } from './components/Send';
+import { Notifications } from '@mantine/notifications';
 
 const myColor: MantineColorsTuple = [
   '#fff0e4',
@@ -34,10 +36,10 @@ export function App() {
       <MantineProvider theme={theme}>
         <Router>
           <AppShell
-            header={{ height: 60 }}
+            header={{ height: 62 }}
           >
             <AppShell.Header >
-              <div style={{ margin: "0 2rem 0 2rem" }}>
+              <div style={{ margin: "0 8rem 0 2rem" }}>
                 <Topbar />
               </div>
             </AppShell.Header>
@@ -50,6 +52,13 @@ export function App() {
                 <Route path="/" element={<Send />} />
               </Routes>
             </AppShell.Main>
+            <Notifications
+              style={{
+                marginTop: 62,
+              }}
+              autoClose={10000}
+              position='top-right'
+            />
           </AppShell>
         </Router>
       </MantineProvider>
