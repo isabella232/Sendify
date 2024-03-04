@@ -12,22 +12,23 @@ import { Send } from './components/Send';
 import { Notifications } from '@mantine/notifications';
 
 const myColor: MantineColorsTuple = [
-  '#fff0e4',
-  '#ffe0cf',
-  '#fac0a1',
-  '#f69e6e',
-  '#f28043',
-  '#f06d27',
-  '#f06418',
-  '#d6530c',
-  '#bf4906',
-  '#a73c00'
+  '#eafcea',
+  '#daf1dc',
+  '#b9e1bb',
+  '#94cf97',
+  '#74c079',
+  '#60b765',
+  '#55b25a',
+  '#449c4a',
+  '#3a8c3f',
+  '#2b7833'
 ];
 
 const theme = createTheme({
   colors: {
-    myColor,
-  }
+    primary: myColor,
+  },
+  primaryColor: "primary",
 });
 
 export function App() {
@@ -39,7 +40,7 @@ export function App() {
             header={{ height: 62 }}
           >
             <AppShell.Header >
-              <div style={{ margin: "0 8rem 0 2rem" }}>
+              <div style={{ margin: "0 2rem" }}>
                 <Topbar />
               </div>
             </AppShell.Header>

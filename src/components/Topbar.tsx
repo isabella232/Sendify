@@ -12,10 +12,13 @@ export function Topbar() {
       }} onClick={() => {
         navigate("/")
       }}>
-        <h2 style={{ margin: 0 }}>Sendify</h2>
+        <h2 style={{ margin: 0 }}>💸 Sendify</h2>
       </Grid.Col>
       <Grid.Col span="auto" />
-      <Grid.Col span={1} >
+      <Grid.Col span={1} style={{
+        display: "flex",
+        justifyContent: "flex-end",
+      }} >
         <ConnectKitButton />
       </Grid.Col>
     </Grid>
