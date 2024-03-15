@@ -10,7 +10,7 @@ export const config = createConfig(
     transports: {
       // RPC URL for each chain
       [arbitrumNova.id]: http(
-        `https://nodes.sequence.app/arbitrum-nova`
+        `https://nodes.sequence.app/arbitrum-nova/AQAAAAAAAC4rgm7lKiJuy1REFJJ_h7oqGss`
       ),
     },
 

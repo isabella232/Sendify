@@ -12,9 +12,10 @@ import { ethers } from 'ethers'
 import { watchContractEvent } from '@wagmi/core'
 import { config } from "../providers/Web3Provider";
 
-const BUNDLER_URL = 'https://af27-83-61-244-167.ngrok-free.app'
+const BUNDLER_URL = 'https://ff59-83-61-244-167.ngrok-free.app'
+console.log("BUNDLER_URL", BUNDLER_URL)
 
-const GAS_LIMIT = 120000
+const GAS_LIMIT = 150000
 const bundlerClient = new Bundler(BUNDLER_URL, fetch)
 
 export function Send() {
@@ -222,16 +223,17 @@ export function Send() {
         body: JSON.stringify({
           operation: {
             entrypoint: HANDLER_ADDRESS,
-            callData: data,
+            data: data,
             endorser: ENDORSER_ADDRESS,
             endorserCallData: "0x",
             endorserGasLimit: "10000000",
             gasLimit: GAS_LIMIT!.toString(),
+            fixedGas: "0",
             maxFeePerGas: maxTokenPerGasEth!.toString(),
-            priorityFeePerGas: minTokenPerGasEth!.toString(),
+            maxPriorityFeePerGas: minTokenPerGasEth!.toString(),
             feeToken: token,
-            baseFeeScalingFactor: tokScaling!.toString(),
-            baseFeeNormalizationFactor: tokNormalization!.toString(),
+            feeScalingFactor: tokScaling!.toString(),
+            feeNormalizationFactor: tokNormalization!.toString(),
             hasUntrustedContext: false,
             chainId: "42170",
           }
