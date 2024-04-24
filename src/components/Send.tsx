@@ -2,53 +2,33 @@ import { Badge, Center, Container, Divider, Paper, RangeSlider, Space, TextInput
 import { Select } from "./Select";
 import { useMemo, useState } from "react";
 import { useAccount, useClient, useEstimateFeesPerGas, useReadContract, useSignTypedData } from 'wagmi'
-import { Address, encodeFunctionData, encodePacked, erc20Abi, formatGwei, formatUnits, isAddress, keccak256, maxUint256, parseUnits, zeroAddress } from 'viem'
+import { Address, encodeFunctionData, encodePacked, erc20Abi, formatGwei, formatUnits, isAddress, keccak256, parseUnits, zeroAddress } from 'viem'
 import { useQuery } from "@tanstack/react-query";
 import { Bundler, SendOperationArgs, SendOperationReturn } from "../clients/Bundler.proto";
-import { ENDORSER_ADDRESS } from "../contracts/Endorser";
-import { HANDLER_ABI, HANDLER_ADDRESS } from "../contracts/Handler";
+import { HANDLER_ABI } from "../contracts/Handler";
 import { notifications } from '@mantine/notifications'
 import { ethers } from 'ethers'
 import { watchContractEvent } from '@wagmi/core'
 import { config } from "../providers/Web3Provider";
+import { BUNDLER_URL, CHAIN_ID, ENDORSER_ADDRESS, GAS_LIMIT, HANDLER_ADDRESS } from "../Constants";
 
-const BUNDLER_URL = 'https://ff59-83-61-244-167.ngrok-free.app'
-console.log("BUNDLER_URL", BUNDLER_URL)
-
-const GAS_LIMIT = 150000
 const bundlerClient = new Bundler(BUNDLER_URL, fetch)
 
 export function Send() {
   const [cacheKey, setCacheKey] = useState("")
-
-  const invalidateCache = () => {
-    setCacheKey(Date.now().toString())
-  }
-
   const [token, setToken] = useState<Address | undefined>()
-  const [to, setTo] = useState<string>("0xB70d2E30B2D2f8af8B657f5Da5B305eC533F6DC2")
+  const [to, setTo] = useState<string>("")
   const [val, setVal] = useState<string>()
   const [range, setRange] = useState<[number, number]>([0.01, 0.20])
   const [sending, setSending] = useState(false)
-
   const client = useClient()
   const { signTypedDataAsync } = useSignTypedData()
-
-
-  const feerange1 = range[0] ** 2
-  const feerange2 = range[1] ** 2
-
   const account = useAccount()
-
-  const estimateGas = useEstimateFeesPerGas()
-  const baseFeeStr = estimateGas.data ? formatGwei(estimateGas.data.maxFeePerGas) : '...'
 
   const { data: feeAsks } = useQuery({
     queryKey: ['feeAsks'],
     queryFn: () => bundlerClient.feeAsks()
   })
-
-  const acceptedTokens = Object.keys(feeAsks?.feeAsks.acceptedTokens ?? {})
 
   const symbol = useReadContract({
     abi: erc20Abi,
@@ -89,6 +69,18 @@ export function Send() {
     args: [account?.address ?? zeroAddress],
     scopeKey: cacheKey
   })
+
+
+  const invalidateCache = () => {
+    setCacheKey(Date.now().toString())
+  }
+
+  const feerange1 = range[0] ** 2
+  const feerange2 = range[1] ** 2
+
+  const estimateGas = useEstimateFeesPerGas()
+  const baseFeeStr = estimateGas.data ? formatGwei(estimateGas.data.maxFeePerGas) : '...'
+  const acceptedTokens = Object.keys(feeAsks?.feeAsks.acceptedTokens ?? {})
 
   const valRaw = val && decimals.data && parseUnits(val, decimals.data)
   const errTo = useMemo(() => (to && !isAddress(to)) && "Invalid address" || undefined, [to])
@@ -143,6 +135,9 @@ export function Send() {
     setSending(true)
 
     try {
+      // Deadline is 600 seconds from now
+      const deadline = Math.floor(Date.now() / 1000) + 600
+
       const ophash = keccak256(
         encodePacked(
           [
@@ -161,7 +156,7 @@ export function Send() {
             account.address!,
             to as any,
             valRaw as any,
-            maxUint256,
+            BigInt(deadline),
             maxTokenPerGasEth as any,
             minTokenPerGasEth as any,
             tokScaling as any,
@@ -173,8 +168,8 @@ export function Send() {
       const signature = await signTypedDataAsync({
         domain: { 
           name: name.data!, 
-          version: '1', 
-          chainId: 42170,
+          version: '2', 
+          chainId: CHAIN_ID,
           verifyingContract: token, 
         }, 
         types: {
@@ -206,7 +201,7 @@ export function Send() {
           account.address,
           to,
           valRaw,
-          maxUint256,
+          deadline,
           minTokenPerGasEth,
           maxTokenPerGasEth,
           tokScaling,
@@ -235,7 +230,7 @@ export function Send() {
             feeScalingFactor: tokScaling!.toString(),
             feeNormalizationFactor: tokNormalization!.toString(),
             hasUntrustedContext: false,
-            chainId: "42170",
+            chainId: CHAIN_ID.toString(),
           }
         } as SendOperationArgs)
       })

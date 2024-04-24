@@ -1,17 +1,16 @@
 import { WagmiProvider, createConfig, http } from "wagmi";
-import { arbitrumNova } from "wagmi/chains";
+import { arbitrum } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ConnectKitProvider, getDefaultConfig } from "connectkit";
+import { NODE_URL } from "../Constants";
 
 export const config = createConfig(
   getDefaultConfig({
     // Your dApps chains
-    chains: [arbitrumNova],
+    chains: [arbitrum],
     transports: {
       // RPC URL for each chain
-      [arbitrumNova.id]: http(
-        `https://nodes.sequence.app/arbitrum-nova/AQAAAAAAAC4rgm7lKiJuy1REFJJ_h7oqGss`
-      ),
+      [arbitrum.id]: http(NODE_URL),
     },
 
     // Required API Keys
