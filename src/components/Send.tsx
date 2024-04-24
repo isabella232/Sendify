@@ -1,16 +1,16 @@
-import { Badge, Center, Container, Divider, Paper, RangeSlider, Space, TextInput, Title, Text, Button, Transition, Loader, Alert } from "@mantine/core";
-import { Select } from "./Select";
-import { useMemo, useState } from "react";
+import { Badge, Center, Container, Divider, Paper, RangeSlider, Space, TextInput, Title, Text, Button, Transition, Loader, Alert } from "@mantine/core"
+import { Select } from "./Select"
+import { useMemo, useState } from "react"
 import { useAccount, useClient, useEstimateFeesPerGas, useReadContract, useSignTypedData } from 'wagmi'
 import { Address, encodeFunctionData, encodePacked, erc20Abi, formatGwei, formatUnits, isAddress, keccak256, parseUnits, zeroAddress } from 'viem'
-import { useQuery } from "@tanstack/react-query";
-import { Bundler, SendOperationArgs, SendOperationReturn } from "../clients/Bundler.proto";
-import { HANDLER_ABI } from "../contracts/Handler";
+import { useQuery } from "@tanstack/react-query"
+import { Bundler, SendOperationArgs, SendOperationReturn } from "../clients/Bundler.proto"
+import { HANDLER_ABI } from "../contracts/Handler"
 import { notifications } from '@mantine/notifications'
 import { ethers } from 'ethers'
 import { watchContractEvent } from '@wagmi/core'
-import { config } from "../providers/Web3Provider";
-import { BUNDLER_URL, CHAIN_ID, ENDORSER_ADDRESS, GAS_LIMIT, HANDLER_ADDRESS } from "../Constants";
+import { config } from "../providers/Web3Provider"
+import { BUNDLER_URL, CHAIN_ID, ENDORSER_ADDRESS, GAS_LIMIT, HANDLER_ADDRESS } from "../Constants"
 import { IconInfoCircle } from '@tabler/icons-react'
 
 const bundlerClient = new Bundler(BUNDLER_URL, fetch)
@@ -88,8 +88,8 @@ export function Send() {
   const errTo = useMemo(() => (to && !isAddress(to)) && "Invalid address" || undefined, [to])
   const errVal = valRaw && balance.data && valRaw > balance.data && "Insufficient balance" || undefined
 
-  var tokScaling: bigint | undefined = undefined
-  var tokNormalization: bigint | undefined = undefined
+  let tokScaling: bigint | undefined = undefined
+  let tokNormalization: bigint | undefined = undefined
 
   if (token && feeAsks?.feeAsks.acceptedTokens[token]) {
     tokScaling = BigInt(feeAsks.feeAsks.acceptedTokens[token].scalingFactor)
@@ -156,13 +156,13 @@ export function Send() {
           [
             token!,
             account.address!,
-            to as any,
-            valRaw as any,
+            to as `0x${string}`,
+            valRaw as bigint,
             BigInt(deadline),
-            maxTokenPerGasEth as any,
-            minTokenPerGasEth as any,
-            tokScaling as any,
-            GAS_LIMIT as any,
+            maxTokenPerGasEth as bigint,
+            minTokenPerGasEth as bigint,
+            tokScaling as bigint,
+            BigInt(GAS_LIMIT),
           ]
         )
       )
@@ -187,7 +187,7 @@ export function Send() {
         message: {
           owner: account.address!,
           spender: HANDLER_ADDRESS,
-          value: (maxCost) as any,
+          value: maxCost as bigint,
           nonce: nonce.data!,
           deadline: ethers.toBigInt(ophash),
         }
@@ -265,7 +265,7 @@ export function Send() {
     } catch (e) {
       notifications.show({
         title: 'Error sending operation',
-        message: (e as any).message ?? (e as any).toString(),
+        message: (e as Error).message ?? 'Unknown error',
         color: 'red',
       })
       console.error(e)

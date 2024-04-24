@@ -1,15 +1,15 @@
-import { AppShell } from '@mantine/core';
-import { Web3Provider } from './providers/Web3Provider';
-import { Topbar } from './components/Topbar';
-import { MantineProvider, createTheme, MantineColorsTuple } from '@mantine/core';
+import { AppShell } from '@mantine/core'
+import { Web3Provider } from './providers/Web3Provider'
+import { Topbar } from './components/Topbar'
+import { MantineProvider, createTheme, MantineColorsTuple } from '@mantine/core'
 import { HashRouter as Router, Route, Routes } from "react-router-dom"
 
-import '@mantine/notifications/styles.css';
+import '@mantine/notifications/styles.css'
 import "@mantine/core/styles.css"
 import "./App.css"
 
-import { Send } from './components/Send';
-import { Notifications } from '@mantine/notifications';
+import { Send } from './components/Send'
+import { Notifications } from '@mantine/notifications'
 
 const myColor: MantineColorsTuple = [
   '#eafcea',
@@ -22,14 +22,14 @@ const myColor: MantineColorsTuple = [
   '#449c4a',
   '#3a8c3f',
   '#2b7833'
-];
+]
 
 const theme = createTheme({
   colors: {
     primary: myColor,
   },
   primaryColor: "primary",
-});
+})
 
 export function App() {
   return (
@@ -64,5 +64,5 @@ export function App() {
         </Router>
       </MantineProvider>
     </Web3Provider> 
-  );
+  )
 }

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Input, InputBase, Combobox, useCombobox } from '@mantine/core';
-import { Address, erc20Abi, formatUnits } from 'viem';
-import { useReadContracts } from 'wagmi';
+import { useEffect, useState } from 'react'
+import { Input, InputBase, Combobox, useCombobox } from '@mantine/core'
+import { Address, erc20Abi, formatUnits } from 'viem'
+import { useReadContracts } from 'wagmi'
 import { useAccount } from 'wagmi'
 
 export function Select(props: {
@@ -14,7 +14,7 @@ export function Select(props: {
     onDropdownClose: () => combobox.resetSelectedOption(),
   })
 
-  const [value, setValue] = useState<Address | undefined>(undefined);
+  const [value, setValue] = useState<Address | undefined>(undefined)
 
   const account = useAccount()
 
@@ -63,19 +63,19 @@ export function Select(props: {
     <Combobox.Option value={item} key={item}>
       {balancesStrs ? balancesStrs[i] : "..."} {symbols ? symbols[i].result?.toString() : "..."} {item}
     </Combobox.Option>
-  ));
+  ))
 
   useEffect(() => {
     props?.onSelect && props.onSelect(value)
-  }, [value])
+  }, [value, props])
 
   return (
     <Combobox
       store={combobox}
       disabled={props?.options.length === 0 || props?.disabled}
       onOptionSubmit={(val) => {
-        setValue(val as Address);
-        combobox.closeDropdown();
+        setValue(val as Address)
+        combobox.closeDropdown()
       }}
     >
       <Combobox.Target>
@@ -99,5 +99,5 @@ export function Select(props: {
         <Combobox.Options>{options}</Combobox.Options>
       </Combobox.Dropdown>
     </Combobox>
-  );
+  )
 }
