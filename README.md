@@ -1,30 +1,42 @@
-# React + TypeScript + Vite
+# Sendify: ERC5189 and ERC20 Token Integration Demo
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+Sendify is a frontend demonstration project that showcases the integration between ERC-5189 operations and ERC-20 tokens. It utilizes a custom "handler" contract and an "endorser" to allow ERC-20 native transfers to be sent to the 5189 mempool. It allows users to send ERC-20 tokens from any EOA wallet, without the need to pay any fees in the native token. Instead, the fees are paid in the ERC-20 token itself.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+![Sendify UI Screenshot](screenshots/sendify-screenshot.png)
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+To set up Sendify locally, follow these steps:
 
-- Configure the top-level `parserOptions` property like this:
+1. **Clone the Repository**
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+   ```bash
+   git clone https://github.com/Agusx1211/sendify
+   ```
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+2. **Install Dependencies**
+
+   Within the project directory, use Bun to install the necessary libraries:
+
+   ```bash
+   cd [project-directory]
+   bun install
+   ```
+
+3. **Run the Application**
+
+   Start the application with the following command:
+
+   ```bash
+   bun start
+   ```
+
+   This will launch the development server and open the application in your web browser.
+
+## Additional Resources
+
+For further details about the smart contracts utilized in this project, please refer to the [ERC5189-ERC20 Handler repository](https://github.com/Agusx1211/ERC5189-ERC20-Handler).
+
+**Note**: This project is a demonstration aimed at showcasing the technical feasibility of integrating ERC5189 with ERC-20 tokens on the Arbitrum network. It is for educational and demonstration purposes only and not suited for production use.

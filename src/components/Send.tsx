@@ -1,4 +1,4 @@
-import { Badge, Center, Container, Divider, Paper, RangeSlider, Space, TextInput, Title, Text, Button, Transition, Loader } from "@mantine/core";
+import { Badge, Center, Container, Divider, Paper, RangeSlider, Space, TextInput, Title, Text, Button, Transition, Loader, Alert } from "@mantine/core";
 import { Select } from "./Select";
 import { useMemo, useState } from "react";
 import { useAccount, useClient, useEstimateFeesPerGas, useReadContract, useSignTypedData } from 'wagmi'
@@ -11,10 +11,12 @@ import { ethers } from 'ethers'
 import { watchContractEvent } from '@wagmi/core'
 import { config } from "../providers/Web3Provider";
 import { BUNDLER_URL, CHAIN_ID, ENDORSER_ADDRESS, GAS_LIMIT, HANDLER_ADDRESS } from "../Constants";
+import { IconInfoCircle } from '@tabler/icons-react'
 
 const bundlerClient = new Bundler(BUNDLER_URL, fetch)
 
 export function Send() {
+  const [warning, setWarning] = useState(true)
   const [cacheKey, setCacheKey] = useState("")
   const [token, setToken] = useState<Address | undefined>()
   const [to, setTo] = useState<string>("")
@@ -336,6 +338,9 @@ export function Send() {
           <Space h="xs" />
           <Divider />
           <Space h="lg" />
+          {warning && <Alert variant="light" color="yellow" withCloseButton title="Alpha Code" icon={<IconInfoCircle />} onClose={() => setWarning(false)} mb="md">
+            This project is built as a demo for an ERC-5189 & ERC-20 integration. It is in alpha stages and not intended for production use.
+          </Alert>}
           <Select
             options={acceptedTokens}
             onSelect={(a) => setToken(a)}
