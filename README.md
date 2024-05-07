@@ -30,7 +30,7 @@ To set up Sendify locally, follow these steps:
    Start the application with the following command:
 
    ```bash
-   bun start
+   bun dev
    ```
 
    This will launch the development server and open the application in your web browser.
