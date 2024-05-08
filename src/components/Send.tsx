@@ -400,7 +400,7 @@ export function Send() {
           <Text c="dimmed">Max basefee: {maxTokenPerGasEth ? formatGwei(maxTokenPerGasEth) : '...'} GWEI</Text>
           <Text c="dimmed">Priority fee: {minTokenPerGasEth ? formatGwei(minTokenPerGasEth) : '...'} GWEI</Text>
           <Text c="dimmed">Fee range: {feerange1.toFixed(2)} - {feerange2.toFixed(2)} USDC</Text>
-          <Text c="dimmed">Balance: {balance.data && decimals.data ? formatUnits(balance.data, decimals.data) : "..."} {symbol.data ? symbol.data : "..."}</Text>
+          <Text c="dimmed">Balance: {balance.data != undefined && decimals.data ? formatUnits(balance.data, decimals.data) : "..."} {symbol.data ? symbol.data : "..."}</Text>
           <Text c="dimmed">Required balance: {maxCost && decimals.data && formatUnits(maxCost, decimals.data) || "..."} {symbol.data ? symbol.data : "..."}</Text>
           <Space h="sm" />
           <Divider variant="dashed" label="Summary" />
