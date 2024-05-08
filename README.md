@@ -6,7 +6,7 @@ Sendify is a frontend demonstration project that showcases the integration betwe
 
 ![Sendify UI Screenshot](screenshots/sendify-screenshot.png)
 
-## Installation
+## Usage
 
 To set up Sendify locally, follow these steps:
 
@@ -25,7 +25,16 @@ To set up Sendify locally, follow these steps:
    bun install
    ```
 
-3. **Run the Application**
+3. **OPTIONAL: Set Up Environment Variables**
+
+   You can override the default configuration by creating a `.env` file in the project directory:
+
+   ```bash
+   cp .env.sample .env
+   # Edit the .env file with your preferred settings
+   ```
+
+4. **Run the Application**
 
    Start the application with the following command:
 

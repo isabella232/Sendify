@@ -10,10 +10,10 @@ import { notifications } from '@mantine/notifications'
 import { ethers } from 'ethers'
 import { watchContractEvent } from '@wagmi/core'
 import { config } from "../providers/Web3Provider"
-import { BUNDLER_URL, CHAIN_ID, ENDORSER_ADDRESS, GAS_LIMIT, HANDLER_ADDRESS } from "../Constants"
+import { Config } from "../Config"
 import { IconInfoCircle } from '@tabler/icons-react'
 
-const bundlerClient = new Bundler(BUNDLER_URL, fetch)
+const bundlerClient = new Bundler(Config.BUNDLER_URL, fetch)
 
 export function Send() {
   const [warning, setWarning] = useState(true)
@@ -109,15 +109,15 @@ export function Send() {
   const maxTokenFeeIn = decimals.data && BigInt(Math.ceil(feerange2 * 10 ** decimals.data))
 
   const minTokenPerGasEth = tokNormalization && minTokenFeeIn && tokScaling && (
-    (minTokenFeeIn * tokNormalization) / (tokScaling * BigInt(GAS_LIMIT))
+    (minTokenFeeIn * tokNormalization) / (tokScaling * BigInt(Config.GAS_LIMIT))
   )
 
   const maxTokenPerGasEth = tokNormalization && maxTokenFeeIn && tokScaling && (
-    (maxTokenFeeIn * tokNormalization) / (tokScaling * BigInt(GAS_LIMIT))
+    (maxTokenFeeIn * tokNormalization) / (tokScaling * BigInt(Config.GAS_LIMIT))
   )
 
   const maxCost = valRaw && maxTokenPerGasEth && tokScaling && tokNormalization && valRaw + (
-    (BigInt(GAS_LIMIT) * maxTokenPerGasEth * tokScaling) / tokNormalization
+    (BigInt(Config.GAS_LIMIT) * maxTokenPerGasEth * tokScaling) / tokNormalization
   )
 
   const ready = !(
@@ -162,7 +162,7 @@ export function Send() {
             maxTokenPerGasEth as bigint,
             minTokenPerGasEth as bigint,
             tokScaling as bigint,
-            BigInt(GAS_LIMIT),
+            BigInt(Config.GAS_LIMIT),
           ]
         )
       )
@@ -171,7 +171,7 @@ export function Send() {
         domain: { 
           name: name.data!, 
           version: '2', 
-          chainId: CHAIN_ID,
+          chainId: Config.CHAIN_ID,
           verifyingContract: token, 
         }, 
         types: {
@@ -186,7 +186,7 @@ export function Send() {
         primaryType: 'Permit',
         message: {
           owner: account.address!,
-          spender: HANDLER_ADDRESS,
+          spender: Config.HANDLER_ADDRESS,
           value: maxCost as bigint,
           nonce: nonce.data!,
           deadline: ethers.toBigInt(ophash),
@@ -207,24 +207,24 @@ export function Send() {
           minTokenPerGasEth,
           maxTokenPerGasEth,
           tokScaling,
-          GAS_LIMIT,
+          Config.GAS_LIMIT,
           r,
           s,
           v
         ]
       })
 
-      const res = await fetch(BUNDLER_URL + '/rpc/Bundler/SendOperation', {
+      const res = await fetch(Config.BUNDLER_URL + '/rpc/Bundler/SendOperation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           operation: {
-            entrypoint: HANDLER_ADDRESS,
+            entrypoint: Config.HANDLER_ADDRESS,
             data: data,
-            endorser: ENDORSER_ADDRESS,
+            endorser: Config.ENDORSER_ADDRESS,
             endorserCallData: "0x",
             endorserGasLimit: "10000000",
-            gasLimit: GAS_LIMIT!.toString(),
+            gasLimit: Config.GAS_LIMIT!.toString(),
             fixedGas: "0",
             maxFeePerGas: maxTokenPerGasEth!.toString(),
             maxPriorityFeePerGas: minTokenPerGasEth!.toString(),
@@ -232,7 +232,7 @@ export function Send() {
             feeScalingFactor: tokScaling!.toString(),
             feeNormalizationFactor: tokNormalization!.toString(),
             hasUntrustedContext: false,
-            chainId: CHAIN_ID.toString(),
+            chainId: Config.CHAIN_ID.toString(),
           }
         } as SendOperationArgs)
       })
