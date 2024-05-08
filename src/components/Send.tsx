@@ -351,17 +351,18 @@ export function Send() {
           <TextInput
             label="Destination address"
             placeholder="0xc0ff...4979"
-            value={to}
+            defaultValue={to}
             disabled={sending}
             onChange={(e) => setTo(e.currentTarget.value)}
             error={errTo}
           />
           <Space h="sm" />
           <TextInput
+            type="number"
             label="Amount"
             placeholder="0.00"
             rightSectionWidth={80}
-            value={val}
+            defaultValue={val}
             disabled={sending}
             error={errVal}
             onChange={(e) => setVal(e.currentTarget.value)}
