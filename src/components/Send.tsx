@@ -1,17 +1,19 @@
-import { Badge, Center, Container, Divider, Paper, RangeSlider, Space, TextInput, Title, Text, Button, Transition, Loader, Alert } from "@mantine/core"
-import { Select } from "./Select"
-import { useMemo, useState } from "react"
-import { useAccount, useClient, useEstimateFeesPerGas, useReadContract, useSignTypedData } from 'wagmi'
-import { Address, encodeFunctionData, encodePacked, erc20Abi, formatGwei, formatUnits, isAddress, keccak256, parseUnits, zeroAddress } from 'viem'
+import { Alert, Badge, Button, Center, Container, Divider, Loader, Paper, RangeSlider, Space, Text, TextInput, Title, Transition } from "@mantine/core"
+import { notifications } from '@mantine/notifications'
+import { IconInfoCircle } from '@tabler/icons-react'
 import { useQuery } from "@tanstack/react-query"
+import { watchContractEvent } from '@wagmi/core'
+import { ethers } from 'ethers'
+import { useMemo, useState } from "react"
+import { Address, encodeFunctionData, erc20Abi, formatGwei, formatUnits, isAddress, parseUnits, zeroAddress } from 'viem'
+import { useAccount, useClient, useEstimateFeesPerGas, useReadContract } from 'wagmi'
+import { readContract } from "wagmi/actions"
+import { Config } from "../Config"
 import { Bundler, SendOperationArgs, SendOperationReturn } from "../clients/Bundler.proto"
 import { HANDLER_ABI } from "../contracts/Handler"
-import { notifications } from '@mantine/notifications'
-import { ethers } from 'ethers'
-import { watchContractEvent } from '@wagmi/core'
+import { useEthersSigner } from "../providers/EthersSigner"
 import { config } from "../providers/Web3Provider"
-import { Config } from "../Config"
-import { IconInfoCircle } from '@tabler/icons-react'
+import { Select } from "./Select"
 
 const bundlerClient = new Bundler(Config.BUNDLER_URL, fetch)
 
@@ -24,8 +26,8 @@ export function Send() {
   const [range, setRange] = useState<[number, number]>([0.01, 0.20])
   const [sending, setSending] = useState(false)
   const client = useClient()
-  const { signTypedDataAsync } = useSignTypedData()
   const account = useAccount()
+  const ethersSigner = useEthersSigner()
 
   const { data: feeAsks } = useQuery({
     queryKey: ['feeAsks'],
@@ -140,34 +142,24 @@ export function Send() {
       // Deadline is 600 seconds from now
       const deadline = Math.floor(Date.now() / 1000) + 600
 
-      const ophash = keccak256(
-        encodePacked(
-          [
-            "address",
-            "address",
-            "address",
-            "uint256",
-            "uint256",
-            "uint256",
-            "uint256",
-            "uint256",
-            "uint256"
-          ],
-          [
-            token!,
-            account.address!,
-            to as `0x${string}`,
-            valRaw as bigint,
-            BigInt(deadline),
-            maxTokenPerGasEth as bigint,
-            minTokenPerGasEth as bigint,
-            tokScaling as bigint,
-            BigInt(Config.GAS_LIMIT),
-          ]
-        )
-      )
+      const ophash = await readContract(config, {
+        abi: HANDLER_ABI,
+        address: Config.HANDLER_ADDRESS,
+        functionName: "getOpHash",
+        args: [
+          token!,
+          account.address!,
+          to,
+          valRaw!,
+          BigInt(deadline),
+          minTokenPerGasEth!,
+          maxTokenPerGasEth!,
+          tokScaling!,
+          BigInt(Config.GAS_LIMIT),
+        ],
+      }) as string
 
-      const signature = await signTypedDataAsync({
+      const sigDetails = {
         domain: { 
           name: name.data!, 
           version: '2', 
@@ -189,9 +181,15 @@ export function Send() {
           spender: Config.HANDLER_ADDRESS,
           value: maxCost as bigint,
           nonce: nonce.data!,
-          deadline: ethers.toBigInt(ophash),
+          deadline: BigInt(ophash),
         }
-      })
+      }
+
+      const signature = await ethersSigner?.signTypedData(
+        sigDetails.domain,
+        sigDetails.types,
+        sigDetails.message
+      )
 
       const { r, s, v } = ethers.Signature.from(signature)
 
