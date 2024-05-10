@@ -4,9 +4,9 @@
 
 Sendify is a frontend demonstration project that showcases the integration between ERC-5189 operations and ERC-20 tokens. It utilizes a custom "handler" contract and an "endorser" to allow ERC-20 native transfers to be sent to the 5189 mempool. It allows users to send ERC-20 tokens from any EOA wallet, without the need to pay any fees in the native token. Instead, the fees are paid in the ERC-20 token itself.
 
-![Sendify UI Screenshot](screenshots/sendify-screenshot.png)
+![Sendify UI Screenshot](docs/sendify-screenshot.png)
 
-## Installation
+## Usage
 
 To set up Sendify locally, follow these steps:
 
@@ -25,12 +25,21 @@ To set up Sendify locally, follow these steps:
    bun install
    ```
 
-3. **Run the Application**
+3. **OPTIONAL: Set Up Environment Variables**
+
+   You can override the default configuration by creating a `.env` file in the project directory:
+
+   ```bash
+   cp .env.sample .env
+   # Edit the .env file with your preferred settings
+   ```
+
+4. **Run the Application**
 
    Start the application with the following command:
 
    ```bash
-   bun start
+   bun dev
    ```
 
    This will launch the development server and open the application in your web browser.

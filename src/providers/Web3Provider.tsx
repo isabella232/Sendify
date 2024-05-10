@@ -2,7 +2,7 @@ import { WagmiProvider, createConfig, http } from "wagmi"
 import { arbitrum } from "wagmi/chains"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { ConnectKitProvider, getDefaultConfig } from "connectkit"
-import { NODE_URL } from "../Constants"
+import { Config } from "../Config"
 
 export const config = createConfig(
   getDefaultConfig({
@@ -10,7 +10,7 @@ export const config = createConfig(
     chains: [arbitrum],
     transports: {
       // RPC URL for each chain
-      [arbitrum.id]: http(NODE_URL),
+      [arbitrum.id]: http(Config.NODE_URL),
     },
 
     // Required API Keys

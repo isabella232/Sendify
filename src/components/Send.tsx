@@ -1,19 +1,21 @@
-import { Badge, Center, Container, Divider, Paper, RangeSlider, Space, TextInput, Title, Text, Button, Transition, Loader, Alert } from "@mantine/core"
-import { Select } from "./Select"
-import { useMemo, useState } from "react"
-import { useAccount, useClient, useEstimateFeesPerGas, useReadContract, useSignTypedData } from 'wagmi'
-import { Address, encodeFunctionData, encodePacked, erc20Abi, formatGwei, formatUnits, isAddress, keccak256, parseUnits, zeroAddress } from 'viem'
+import { Alert, Badge, Button, Center, Container, Divider, Loader, Paper, RangeSlider, Space, Text, TextInput, Title, Transition } from "@mantine/core"
+import { notifications } from '@mantine/notifications'
+import { IconInfoCircle } from '@tabler/icons-react'
 import { useQuery } from "@tanstack/react-query"
+import { watchContractEvent } from '@wagmi/core'
+import { ethers } from 'ethers'
+import { useMemo, useState } from "react"
+import { Address, encodeFunctionData, erc20Abi, formatGwei, formatUnits, isAddress, parseUnits, zeroAddress } from 'viem'
+import { useAccount, useClient, useEstimateFeesPerGas, useReadContract } from 'wagmi'
+import { readContract } from "wagmi/actions"
+import { Config } from "../Config"
 import { Bundler, SendOperationArgs, SendOperationReturn } from "../clients/Bundler.proto"
 import { HANDLER_ABI } from "../contracts/Handler"
-import { notifications } from '@mantine/notifications'
-import { ethers } from 'ethers'
-import { watchContractEvent } from '@wagmi/core'
+import { useEthersSigner } from "../providers/EthersSigner"
 import { config } from "../providers/Web3Provider"
-import { BUNDLER_URL, CHAIN_ID, ENDORSER_ADDRESS, GAS_LIMIT, HANDLER_ADDRESS } from "../Constants"
-import { IconInfoCircle } from '@tabler/icons-react'
+import { Select } from "./Select"
 
-const bundlerClient = new Bundler(BUNDLER_URL, fetch)
+const bundlerClient = new Bundler(Config.BUNDLER_URL, fetch)
 
 export function Send() {
   const [warning, setWarning] = useState(true)
@@ -24,8 +26,8 @@ export function Send() {
   const [range, setRange] = useState<[number, number]>([0.01, 0.20])
   const [sending, setSending] = useState(false)
   const client = useClient()
-  const { signTypedDataAsync } = useSignTypedData()
   const account = useAccount()
+  const ethersSigner = useEthersSigner()
 
   const { data: feeAsks } = useQuery({
     queryKey: ['feeAsks'],
@@ -109,15 +111,15 @@ export function Send() {
   const maxTokenFeeIn = decimals.data && BigInt(Math.ceil(feerange2 * 10 ** decimals.data))
 
   const minTokenPerGasEth = tokNormalization && minTokenFeeIn && tokScaling && (
-    (minTokenFeeIn * tokNormalization) / (tokScaling * BigInt(GAS_LIMIT))
+    (minTokenFeeIn * tokNormalization) / (tokScaling * BigInt(Config.GAS_LIMIT))
   )
 
   const maxTokenPerGasEth = tokNormalization && maxTokenFeeIn && tokScaling && (
-    (maxTokenFeeIn * tokNormalization) / (tokScaling * BigInt(GAS_LIMIT))
+    (maxTokenFeeIn * tokNormalization) / (tokScaling * BigInt(Config.GAS_LIMIT))
   )
 
   const maxCost = valRaw && maxTokenPerGasEth && tokScaling && tokNormalization && valRaw + (
-    (BigInt(GAS_LIMIT) * maxTokenPerGasEth * tokScaling) / tokNormalization
+    (BigInt(Config.GAS_LIMIT) * maxTokenPerGasEth * tokScaling) / tokNormalization
   )
 
   const ready = !(
@@ -140,38 +142,28 @@ export function Send() {
       // Deadline is 600 seconds from now
       const deadline = Math.floor(Date.now() / 1000) + 600
 
-      const ophash = keccak256(
-        encodePacked(
-          [
-            "address",
-            "address",
-            "address",
-            "uint256",
-            "uint256",
-            "uint256",
-            "uint256",
-            "uint256",
-            "uint256"
-          ],
-          [
-            token!,
-            account.address!,
-            to as `0x${string}`,
-            valRaw as bigint,
-            BigInt(deadline),
-            maxTokenPerGasEth as bigint,
-            minTokenPerGasEth as bigint,
-            tokScaling as bigint,
-            BigInt(GAS_LIMIT),
-          ]
-        )
-      )
+      const ophash = await readContract(config, {
+        abi: HANDLER_ABI,
+        address: Config.HANDLER_ADDRESS,
+        functionName: "getOpHash",
+        args: [
+          token!,
+          account.address!,
+          to,
+          valRaw!,
+          BigInt(deadline),
+          minTokenPerGasEth!,
+          maxTokenPerGasEth!,
+          tokScaling!,
+          BigInt(Config.GAS_LIMIT),
+        ],
+      }) as string
 
-      const signature = await signTypedDataAsync({
+      const sigDetails = {
         domain: { 
           name: name.data!, 
           version: '2', 
-          chainId: CHAIN_ID,
+          chainId: Config.CHAIN_ID,
           verifyingContract: token, 
         }, 
         types: {
@@ -186,12 +178,18 @@ export function Send() {
         primaryType: 'Permit',
         message: {
           owner: account.address!,
-          spender: HANDLER_ADDRESS,
+          spender: Config.HANDLER_ADDRESS,
           value: maxCost as bigint,
           nonce: nonce.data!,
-          deadline: ethers.toBigInt(ophash),
+          deadline: BigInt(ophash),
         }
-      })
+      }
+
+      const signature = await ethersSigner?.signTypedData(
+        sigDetails.domain,
+        sigDetails.types,
+        sigDetails.message
+      )
 
       const { r, s, v } = ethers.Signature.from(signature)
 
@@ -207,24 +205,24 @@ export function Send() {
           minTokenPerGasEth,
           maxTokenPerGasEth,
           tokScaling,
-          GAS_LIMIT,
+          Config.GAS_LIMIT,
           r,
           s,
           v
         ]
       })
 
-      const res = await fetch(BUNDLER_URL + '/rpc/Bundler/SendOperation', {
+      const res = await fetch(Config.BUNDLER_URL + '/rpc/Bundler/SendOperation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           operation: {
-            entrypoint: HANDLER_ADDRESS,
+            entrypoint: Config.HANDLER_ADDRESS,
             data: data,
-            endorser: ENDORSER_ADDRESS,
+            endorser: Config.ENDORSER_ADDRESS,
             endorserCallData: "0x",
             endorserGasLimit: "10000000",
-            gasLimit: GAS_LIMIT!.toString(),
+            gasLimit: Config.GAS_LIMIT!.toString(),
             fixedGas: "0",
             maxFeePerGas: maxTokenPerGasEth!.toString(),
             maxPriorityFeePerGas: minTokenPerGasEth!.toString(),
@@ -232,7 +230,7 @@ export function Send() {
             feeScalingFactor: tokScaling!.toString(),
             feeNormalizationFactor: tokNormalization!.toString(),
             hasUntrustedContext: false,
-            chainId: CHAIN_ID.toString(),
+            chainId: Config.CHAIN_ID.toString(),
           }
         } as SendOperationArgs)
       })
@@ -351,17 +349,18 @@ export function Send() {
           <TextInput
             label="Destination address"
             placeholder="0xc0ff...4979"
-            value={to}
+            defaultValue={to}
             disabled={sending}
             onChange={(e) => setTo(e.currentTarget.value)}
             error={errTo}
           />
           <Space h="sm" />
           <TextInput
+            type="number"
             label="Amount"
             placeholder="0.00"
             rightSectionWidth={80}
-            value={val}
+            defaultValue={val}
             disabled={sending}
             error={errVal}
             onChange={(e) => setVal(e.currentTarget.value)}
@@ -399,7 +398,7 @@ export function Send() {
           <Text c="dimmed">Max basefee: {maxTokenPerGasEth ? formatGwei(maxTokenPerGasEth) : '...'} GWEI</Text>
           <Text c="dimmed">Priority fee: {minTokenPerGasEth ? formatGwei(minTokenPerGasEth) : '...'} GWEI</Text>
           <Text c="dimmed">Fee range: {feerange1.toFixed(2)} - {feerange2.toFixed(2)} USDC</Text>
-          <Text c="dimmed">Balance: {balance.data && decimals.data ? formatUnits(balance.data, decimals.data) : "..."} {symbol.data ? symbol.data : "..."}</Text>
+          <Text c="dimmed">Balance: {balance.data != undefined && decimals.data ? formatUnits(balance.data, decimals.data) : "..."} {symbol.data ? symbol.data : "..."}</Text>
           <Text c="dimmed">Required balance: {maxCost && decimals.data && formatUnits(maxCost, decimals.data) || "..."} {symbol.data ? symbol.data : "..."}</Text>
           <Space h="sm" />
           <Divider variant="dashed" label="Summary" />
