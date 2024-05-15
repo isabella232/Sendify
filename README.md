@@ -13,7 +13,7 @@ To set up Sendify locally, follow these steps:
 1. **Clone the Repository**
 
    ```bash
-   git clone https://github.com/Agusx1211/sendify
+   git clone https://github.com/0xsequence/sendify
    ```
 
 2. **Install Dependencies**
@@ -46,6 +46,6 @@ To set up Sendify locally, follow these steps:
 
 ## Additional Resources
 
-For further details about the smart contracts utilized in this project, please refer to the [ERC5189-ERC20 Handler repository](https://github.com/Agusx1211/ERC5189-ERC20-Handler).
+For further details about the smart contracts utilized in this project, please refer to the [ERC5189-ERC20 Handler repository](https://github.com/0xsequence/ERC5189-ERC20-Handler).
 
 **Note**: This project is a demonstration aimed at showcasing the technical feasibility of integrating ERC5189 with ERC-20 tokens on the Arbitrum network. It is for educational and demonstration purposes only and not suited for production use.

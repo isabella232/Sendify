@@ -3,7 +3,7 @@
 To run an entire ERC-5189 and ERC-20 integration demo, you will need to set up the following components:
 
 * [Sendify Frontend](../README.md)
-* [Handler and Endorser Contracts](https://github.com/Agusx1211/ERC5189-ERC20-Handler)
+* [Handler and Endorser Contracts](https://github.com/0xsequence/ERC5189-ERC20-Handler)
 * [ERC-5189 Bundler and Registry](https://github.com/0xsequence/bundler)
 
 This guide will walk you through the process of setting up each component and running the demo locally.
