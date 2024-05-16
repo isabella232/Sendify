@@ -43,12 +43,12 @@ rpc_port = 3000
   mode = "none" # Not required for Sendify
 
 [endorser_registry]
-  MinReputation = 0
-  TempBanSeconds = 86400
+  min_reputation = 1
+  temp_ban_duration = 86400
 
   [[endorser_registry.sources]]
-    Weight = 1
-    Address = "0xcd4e127B83E6A170195e6A561EaB02406ec8B941"
+    weight = 1
+    address = "0xcd4e127B83E6A170195e6A561EaB02406ec8B941"
 
 [collector]
   min_priority_fee = 2500000
@@ -73,9 +73,6 @@ rpc_port = 3000
 
 [mempool]
   max_size = 1000
-
-[endorser_registry]
-  min_reputation = 0 # Update this
 
 [logging]
   service       = "bundler"
