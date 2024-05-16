@@ -1,6 +1,6 @@
 import { Alert, Badge, Button, Center, Container, Divider, Loader, Paper, RangeSlider, Space, Text, TextInput, Title, Transition } from "@mantine/core"
 import { notifications } from '@mantine/notifications'
-import { IconAlertTriangle, IconInfoCircle } from '@tabler/icons-react'
+import { IconInfoCircle } from '@tabler/icons-react'
 import { useQuery } from "@tanstack/react-query"
 import { watchContractEvent } from '@wagmi/core'
 import { ethers } from 'ethers'
@@ -335,12 +335,8 @@ export function Send() {
           </Title>
           <Space h="xs" />
           <Divider />
-          <Alert variant="light" color="red" title="Coming Soon" icon={<IconAlertTriangle />} mb="md">
-          We are pleased to inform you that Sendify is in the final stages of deployment. We appreciate your patience and look forward to providing you with a seamless and secure token transfer mechanism soon.
-          </Alert>
-          <Divider />
           <Space h="lg" />
-          {false && warning && <Alert variant="light" color="yellow" withCloseButton title="Alpha Code" icon={<IconInfoCircle />} onClose={() => setWarning(false)} mb="md">
+          {warning && <Alert variant="light" color="yellow" withCloseButton title="Alpha Code" icon={<IconInfoCircle />} onClose={() => setWarning(false)} mb="md">
             This project is built as a demo for an ERC-5189 & ERC-20 integration. It is in alpha stages and not intended for production use.
           </Alert>}
           <Select
